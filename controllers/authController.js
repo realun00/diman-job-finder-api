@@ -1,11 +1,13 @@
-import User from "./models/User.js";
-import Role from "./models/Role.js";
+import User from "../models/User.js";
+import Role from "../models/Role.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+import { ObjectId } from "mongodb";
+
 import { validationResult } from "express-validator";
 
-import config from "./config.js";
+import config from "../config.js";
 
 const generateAccessToken = (id, roles) => {
   const payload = {
@@ -95,7 +97,87 @@ class authController {
       const users = await User.find();
       res.json(users);
     } catch (error) {
-      console.log(error)
+      console.log(error);
+    }
+  }
+
+  async getUser(req, res) {
+    try {
+      const userId = req.params?.id;
+
+      if (!userId) {
+        return res.status(404).json({ message: "User ID must be defined" });
+      }
+
+      await User.findById(userId).exec((error, user) => {
+        if (error) {
+          return res.status(404).json({ message: `Invalid ID: ${userId}` });
+        }
+        if (user) {
+          return res.json(user);
+        } else {
+          return res.send(`User with id ${userId} could not be found`);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async deleteUser(req, res) {
+    try {
+      const userId = req.params?.id;
+
+      if (!userId) {
+        return res.status(404).json({ message: "User ID must be defined" });
+      }
+
+      await User.findById(userId).exec((error, user) => {
+        if (error) {
+          return res.status(404).json({ message: `Invalid ID: ${userId}` });
+        }
+        if (user) {
+          user.deleteOne();
+          return res.json({ message: `User ${user?.username} has been deleted successfully` });
+        } else {
+          return res.status(404).json({ message: `User could not be found` });
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async updateUser(req, res) {
+    try {
+      const userId = req.params?.id;
+
+      if (!userId) {
+        return res.status(404).json({ message: "User ID must be defined" });
+      }
+
+      await User.findOneAndUpdate({ _id: userId }, req.body, {
+        new: true,
+        upsert: true, // Make this update into an upsert
+      }).exec((error, doc) => {
+        if (error) {
+          console.log(error)
+          return res.status(400).json({ message: `Unable to update` });
+        }
+        if (doc) {
+          const filteredData = Object.fromEntries(
+            Object.entries(Object.values(doc)[2]).filter(([key]) => key.includes("email") || key.includes("username"))
+          );
+
+          return res
+            .status(200)
+            .json({ message: `User ${doc?.username} has been updated successfully`, data: filteredData });
+        } else {
+          return res.status(404).json({ message: `User could not be found` });
+        }
+      });
+    } catch (error) {
+      console.log(error);
     }
   }
 }
