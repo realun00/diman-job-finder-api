@@ -21,8 +21,12 @@ router.post(
 );
 router.post("/login", controller.login);
 router.get("/user", roleMiddleware(["ADMIN"]), controller.getUsers);
+router.get("/userDetails", roleMiddleware(["ADMIN", "ORGANIZATION", "USER"]), controller.getUserDetails);
 router.get("/user/:id", roleMiddleware(["ADMIN", "ORGANIZATION", "USER"]), controller.getUser);
 router.delete("/user/:id", roleMiddleware(["ADMIN", "ORGANIZATION", "USER"]), controller.deleteUser);
 router.put("/user/:id", roleMiddleware(["ADMIN", "ORGANIZATION", "USER"]), controller.updateUser);
+router.put("/updateUserDetails", roleMiddleware(["ADMIN", "ORGANIZATION", "USER"]), controller.updateUserDetails);
+router.patch("/changePassword", roleMiddleware(["ADMIN", "ORGANIZATION", "USER"]), controller.changePassword);
+
 
 export default router;

@@ -8,7 +8,7 @@ export default function (roles) {
     }
 
     try {
-      const token = req.headers.authorization.split(" ")[1];
+      const token = req.headers?.authorization?.split(" ")[1];
 
       if (!token) {
         return res.status(403).json({ message: "User is not authorized" });
@@ -40,6 +40,8 @@ export default function (roles) {
       if (!hasRole) {
         return res.status(403).json({ message: "No access" });
       }
+
+      req.userId = userId;
 
       next();
     } catch (error) {
