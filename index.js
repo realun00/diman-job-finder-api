@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 // Enable CORS for all routes or specify the origin
 app.use(cors({
-  origin: 'http://localhost:4200', // Allow requests from Angular app
+  origin: '*', // Allow requests from Angular app
   credentials: true // If you need to allow cookies, set this to true
 }));
 
